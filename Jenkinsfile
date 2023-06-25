@@ -21,10 +21,14 @@ pipeline {
 			sh 'php artisan migrate'
 		}
     }
-
     stage('Test') {
       steps {
         sh './vendor/bin/phpunit'
+      }
+    }
+	stage('deploy') {
+      steps {
+        sh 'cp -r $(pwd)/. /ic17app'
       }
     }
   }
