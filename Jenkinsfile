@@ -9,21 +9,23 @@ pipeline {
 			DB_PASSWORD = credentials("laravel-password")
 		}
 		steps {
-			bat 'composer install'
-			bat 'cp .env.example .env'
-			bat 'echo DB_HOST=${DB_HOST} >> .env'
-			bat 'echo DB_USERNAME=${DB_USERNAME} >> .env'
-			bat 'echo DB_DATABASE=${DB_DATABASE} >> .env'
-            bat 'echo DB_PASSWORD=${DB_PASSWORD} >> .env'
-			bat 'php artisan key:generate'
-			bat 'npm install'
-			bat 'npm run prod'
+			git 'https://github.com/LeonCher/SubGrupo17IntegracionContinua'
+			sh 'composer install'
+			sh 'cp .env.example .env'
+			sh 'echo DB_HOST=${DB_HOST} >> .env'
+			sh 'echo DB_USERNAME=${DB_USERNAME} >> .env'
+			sh 'echo DB_DATABASE=${DB_DATABASE} >> .env'
+            sh 'echo DB_PASSWORD=${DB_PASSWORD} >> .env'
+			sh 'php artisan key:generate'
+			sh 'php artisan optimize'
+			sh 'npm install'
+			sh 'php artisan migrate'
 		}
     }
 
     stage('Test') {
       steps {
-        bat './vendor/bin/phpunit'
+        sh './vendor/bin/phpunit'
       }
     }
   }
