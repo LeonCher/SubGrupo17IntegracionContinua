@@ -29,6 +29,7 @@ pipeline {
 	stage('deploy') {
       steps {
         sh 'cp -r $(pwd)/. /ic17app'
+		sh '/ic17app/php artisan optimize'
       }
     }
   }
