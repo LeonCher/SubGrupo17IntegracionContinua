@@ -9,7 +9,6 @@ pipeline {
 			DB_PASSWORD = credentials("laravel-password")
 		}
 		steps {
-			git 'https://github.com/LeonCher/SubGrupo17IntegracionContinua'
 			sh 'composer install'
 			sh 'cp .env.example .env'
 			sh 'echo DB_HOST=${DB_HOST} >> .env'
