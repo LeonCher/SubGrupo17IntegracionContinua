@@ -31,7 +31,7 @@ pipeline {
       steps {
         sh 'cp -r $(pwd)/. /ic17app'
 		sshagent(credentials : ['ssh-credentials-id']) {
-			sh 'ssh -o StrictHostKeyChecking=no -l www ${DIFF_APP_HOST} cd /var/www && php artisan optimize'
+			sh 'ssh -o StrictHostKeyChecking=no -l www 172.18.0.2 cd /var/www && php artisan optimize'
         }
       }
     }
