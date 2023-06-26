@@ -7,6 +7,7 @@ pipeline {
 			DIFF_DB_DATABASE = credentials('laravel-database')
 			DIFF_DB_USERNAME = credentials('laravel-user')
 			DIFF_DB_PASSWORD = credentials('laravel-password')
+			DIFF_APP_HOST = credentials('app-host')
 		}
 		steps {
 			sh 'composer install'
@@ -30,7 +31,7 @@ pipeline {
       steps {
         sh 'cp -r $(pwd)/. /ic17app'
 		sshagent(credentials : ['ssh-credentials-id']) {
-            sh '/var/www/php artisan optimize'
+			sh 'ssh -o StrictHostKeyChecking=no -l www ${DIFF_APP_HOST} cd /var/www && php artisan optimize'
         }
       }
     }
