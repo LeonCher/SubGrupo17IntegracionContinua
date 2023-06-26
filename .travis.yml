@@ -1,0 +1,20 @@
+language: php
+
+php:
+  - 8.1
+
+addons:
+  postgresql: "9.4"
+
+before_install:
+  - composer self-update
+  - cp .env.travis .env
+  - psql -c 'create database ic17_app;' -U postgres
+
+install:
+  - composer install --dev
+  - php artisan optimize
+
+script:
+  - php artisan migrate --seed
+  - ./vendor/bin/phpunit
