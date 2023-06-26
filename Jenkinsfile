@@ -29,7 +29,9 @@ pipeline {
 	stage('deploy') {
       steps {
         sh 'cp -r $(pwd)/. /ic17app'
-		sh '/ic17app/php artisan optimize'
+		sshagent(credentials : ['ssh-credentials-id']) {
+            sh '/var/www/php artisan optimize'
+        }
       }
     }
   }
