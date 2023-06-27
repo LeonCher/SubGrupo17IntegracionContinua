@@ -1,0 +1,46 @@
+FROM jenkins/jenkins:lts
+USER root
+
+# Install Jenkins plugins
+COPY plugins.txt /usr/share/jenkins/ref/plugins.txt
+RUN jenkins-plugin-cli -f /usr/share/jenkins/ref/plugins.txt
+
+# Install PHP 8.1
+RUN apt-get update && apt upgrade -y
+RUN apt install -y lsb-release ca-certificates apt-transport-https software-properties-common gnupg2 locales wget
+RUN locale-gen en_US.UTF-8
+RUN echo "deb https://packages.sury.org/php/ $(lsb_release -sc) main" | tee /etc/apt/sources.list.d/sury-php.list
+RUN wget -qO - https://packages.sury.org/php/apt.gpg | gpg --no-default-keyring --keyring gnupg-ring:/etc/apt/trusted.gpg.d/debian-php-8.gpg --import
+RUN chmod 644 /etc/apt/trusted.gpg.d/debian-php-8.gpg
+RUN apt update && apt upgrade -y
+RUN apt install -y --no-install-recommends php8.1
+RUN apt install -y php8.1-mbstring php8.1-xml php8.1-bcmath php8.1-curl php8.1-mysql
+RUN apt install -y sshpass
+RUN apt install -y rsync
+
+# Install Node and NPM
+ENV NODE_VERSION=16.13.0
+RUN apt install -y curl
+RUN curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+ENV NVM_DIR=/root/.nvm
+RUN . "$NVM_DIR/nvm.sh" && nvm install ${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm use v${NODE_VERSION}
+RUN . "$NVM_DIR/nvm.sh" && nvm alias default v${NODE_VERSION}
+ENV PATH="/root/.nvm/versions/node/v${NODE_VERSION}/bin/:${PATH}"
+RUN node --version
+RUN npm --version
+	
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+
+# Setting up environment variables for Jenkins admin user
+ENV JENKINS_USER admin
+ENV JENKINS_PASS admin
+
+# Skip the initial setup wizard
+ENV JAVA_OPTS -Djenkins.install.runSetupWizard=false
+
+# Start-up scripts to set number of executors and creating the admin user
+COPY default-user.groovy /usr/share/jenkins/ref/init.groovy.d/
+
+VOLUME /var/jenkins_home
