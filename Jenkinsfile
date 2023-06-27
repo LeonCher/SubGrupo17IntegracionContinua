@@ -7,7 +7,6 @@ pipeline {
 			DIFF_DB_DATABASE = credentials('laravel-database')
 			DIFF_DB_USERNAME = credentials('laravel-user')
 			DIFF_DB_PASSWORD = credentials('laravel-password')
-			DIFF_APP_HOST = credentials('app-host')
 		}
 		steps {
 			sh 'composer install'
@@ -28,15 +27,20 @@ pipeline {
       }
     }
 	stage('deploy') {
+	  environment {
+		DIFF_APP_HOST = credentials('app-host')
+		DIFF_APP_USER = credentials('app-user')
+		DIFF_APP_PASSWORD = credentials('app-password')		
+	  }
       steps {
 		sh 'rsync -av $(pwd)/. /var/www --exclude .git --exclude  vendor --exclude node_modules'
-		sh 'sshpass -p ic17root rsync -av /var/www root@172.18.0.2:/var/'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "cd /var/www/; composer install; npm install; php artisan optimize; php artisan storage:link"'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/storage"'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/bootstrap/cache"'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www:www /var/www"'
-        sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data:www-data /var/www"'
-        sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chmod -R 777 /var/www/storage/"'
+		sh 'sshpass -p $DIFF_APP_PASSWORD rsync -av /var/www $DIFF_APP_USER@$DIFF_APP_HOST:/var/'
+		sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "cd /var/www/; composer install; npm install; php artisan optimize; php artisan storage:link"'
+		sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "chown -R www-data: /var/www/storage"'
+		sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "chown -R www-data: /var/www/bootstrap/cache"'
+		sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "chown -R www:www /var/www"'
+        sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "chown -R www-data:www-data /var/www"'
+        sh 'sshpass -p $DIFF_APP_PASSWORD ssh -tt $DIFF_APP_USER@$DIFF_APP_HOST -p 22 "chmod -R 777 /var/www/storage/"'
       }
     }
   }
