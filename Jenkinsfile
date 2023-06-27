@@ -29,10 +29,14 @@ pipeline {
     }
 	stage('deploy') {
       steps {
-		sh 'sshpass -p ic17root scp -r $(pwd)/ root@172.18.0.2:/var/www/'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "cd /var/www/; php artisan optimize"'
+		sh 'rsync -av $(pwd)/. /var/www --exclude .git --exclude  vendor --exclude node_modules'
+		sh 'sshpass -p ic17root rsync -av /var/www root@172.18.0.2:/var/'
+		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "cd /var/www/; composer install; npm install; php artisan optimize; php artisan storage:link"'
 		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/storage"'
 		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/wwwbootstrap/cache"'
+		sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www:www /var/www"
+        sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data:www-data /var/www" 
+        sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chmod -R 777 /var/www/storage/"
       }
     }
   }
