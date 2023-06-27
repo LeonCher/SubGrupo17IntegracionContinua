@@ -33,7 +33,7 @@ pipeline {
 		sh 'sshpass -p ic17root rsync -av /var/www root@172.18.0.2:/var/'
 		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "cd /var/www/; composer install; npm install; php artisan optimize; php artisan storage:link"'
 		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/storage"'
-		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/wwwbootstrap/cache"'
+		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/bootstrap/cache"'
 		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www:www /var/www"'
         sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data:www-data /var/www"'
         sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chmod -R 777 /var/www/storage/"'
