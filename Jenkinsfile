@@ -29,10 +29,10 @@ pipeline {
     }
 	stage('deploy') {
       steps {
-        sh 'cp -r $(pwd)/. /ic17app'
-		sshagent(credentials : ['ssh-credentials-id']) {
-			sh 'ssh -t root@172.18.0.3 -p 22 "cd /var/www && php artisan optimize"'
-        }
+		sh 'sshpass -p ic17root scp -r $(pwd)/ root@172.18.0.2:/var/www/'
+		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "cd /var/www/; php artisan optimize"'
+		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/www/storage"'
+		sh 'sshpass -p ic17root ssh -tt root@172.18.0.2 -p 22 "chown -R www-data: /var/wwwbootstrap/cache"'
       }
     }
   }
